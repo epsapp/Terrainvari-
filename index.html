@@ -1,0 +1,1942 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#1a1a2e">
+<title>Trail Coach</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg-deep: #0f0f1a;
+  --bg-card: #1a1a2e;
+  --bg-card-hover: #222240;
+  --accent-primary: #e94560;
+  --accent-warm: #f5a623;
+  --accent-green: #2ecc71;
+  --accent-blue: #3498db;
+  --accent-purple: #9b59b6;
+  --text-primary: #f0f0f0;
+  --text-secondary: #8a8aaf;
+  --text-muted: #5a5a7a;
+  --border-subtle: rgba(255,255,255,0.06);
+  --shadow-glow: 0 0 30px rgba(233,69,96,0.15);
+  --radius: 16px;
+  --radius-sm: 10px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  font-family: 'Outfit', sans-serif;
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  padding-top: var(--safe-top);
+  padding-bottom: var(--safe-bottom);
+}
+
+/* ─── Background texture ─── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: 
+    radial-gradient(ellipse at 20% 0%, rgba(233,69,96,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 100%, rgba(52,152,219,0.06) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ─── Header ─── */
+.header {
+  position: relative;
+  z-index: 10;
+  padding: 16px 20px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.header-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.header-logo svg {
+  width: 28px;
+  height: 28px;
+}
+
+.header-logo h1 {
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-warm));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-icon:active {
+  transform: scale(0.92);
+  background: var(--bg-card-hover);
+}
+
+.btn-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* ─── Main scroll area ─── */
+.main-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: relative;
+  z-index: 5;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+.main-content::-webkit-scrollbar { display: none; }
+
+.screen {
+  display: none;
+  padding: 0 20px 100px;
+  animation: fadeIn 0.3s ease;
+}
+
+.screen.active { display: block; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── Section titles ─── */
+.section-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: 24px 0 12px 4px;
+}
+
+/* ─── Timer display ─── */
+.timer-display {
+  text-align: center;
+  padding: 28px 0 20px;
+}
+
+.timer-time {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 3.6rem;
+  font-weight: 700;
+  letter-spacing: -1px;
+  line-height: 1;
+  color: var(--text-primary);
+}
+
+.timer-label {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-top: 6px;
+  font-weight: 500;
+}
+
+/* ─── Timer controls ─── */
+.timer-controls {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  padding: 0 20px;
+  margin-bottom: 20px;
+}
+
+.btn-timer {
+  flex: 1;
+  max-width: 180px;
+  padding: 14px 20px;
+  border-radius: var(--radius);
+  border: none;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-timer:active { transform: scale(0.95); }
+
+.btn-start {
+  background: linear-gradient(135deg, var(--accent-green), #27ae60);
+  color: #fff;
+  box-shadow: 0 4px 20px rgba(46,204,113,0.3);
+}
+
+.btn-stop {
+  background: linear-gradient(135deg, var(--accent-primary), #c0392b);
+  color: #fff;
+  box-shadow: 0 4px 20px rgba(233,69,96,0.3);
+}
+
+.btn-reset {
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-subtle);
+}
+
+.btn-timer svg { width: 18px; height: 18px; }
+
+/* ─── Loop buttons ─── */
+.loop-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 0 0 16px;
+}
+
+.loop-btn {
+  position: relative;
+  padding: 18px 16px;
+  border-radius: var(--radius);
+  border: 2px solid var(--border-subtle);
+  background: var(--bg-card);
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+  overflow: hidden;
+}
+
+.loop-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  border-radius: 2px 0 0 2px;
+}
+
+.loop-btn[data-loop="1"]::before { background: var(--accent-green); }
+.loop-btn[data-loop="2"]::before { background: var(--accent-blue); }
+.loop-btn[data-loop="3"]::before { background: var(--accent-warm); }
+.loop-btn[data-loop="4"]::before { background: var(--accent-primary); }
+
+.loop-btn:active {
+  transform: scale(0.96);
+  border-color: rgba(255,255,255,0.15);
+}
+
+.loop-btn.disabled {
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+.loop-name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.loop-info {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.loop-info span {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+/* ─── Runner cards ─── */
+.runner-card {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 10px;
+  border: 1px solid var(--border-subtle);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.runner-card:active {
+  transform: scale(0.98);
+  background: var(--bg-card-hover);
+}
+
+.runner-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.runner-name {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.runner-status {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+  letter-spacing: 0.5px;
+}
+
+.runner-status.running {
+  background: rgba(46,204,113,0.15);
+  color: var(--accent-green);
+}
+
+.runner-status.finished {
+  background: rgba(233,69,96,0.15);
+  color: var(--accent-primary);
+}
+
+.runner-stats {
+  display: flex;
+  gap: 16px;
+}
+
+.runner-stat {
+  display: flex;
+  flex-direction: column;
+}
+
+.runner-stat-label {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 600;
+}
+
+.runner-stat-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* ─── Passage feed ─── */
+.passage-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-subtle);
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.passage-loop-badge {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.85rem;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.passage-loop-badge[data-loop="1"] { background: var(--accent-green); }
+.passage-loop-badge[data-loop="2"] { background: var(--accent-blue); }
+.passage-loop-badge[data-loop="3"] { background: var(--accent-warm); }
+.passage-loop-badge[data-loop="4"] { background: var(--accent-primary); }
+
+.passage-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.passage-runner-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.passage-meta {
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.passage-time {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.passage-time-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.passage-speed {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+/* ─── Setup screen ─── */
+.setup-card {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 16px;
+  border: 1px solid var(--border-subtle);
+}
+
+.setup-card h3 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.setup-card h3 svg { width: 18px; height: 18px; color: var(--accent-primary); }
+
+.form-group {
+  margin-bottom: 14px;
+}
+
+.form-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+  letter-spacing: 0.5px;
+}
+
+.form-input {
+  width: 100%;
+  padding: 11px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.9rem;
+  transition: border-color 0.2s;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--accent-primary);
+}
+
+.form-input::placeholder {
+  color: var(--text-muted);
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.form-row-3 {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 10px;
+}
+
+.loop-config-item {
+  background: rgba(255,255,255,0.02);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  margin-bottom: 8px;
+  border-left: 3px solid;
+}
+
+.loop-config-item:nth-child(1) { border-color: var(--accent-green); }
+.loop-config-item:nth-child(2) { border-color: var(--accent-blue); }
+.loop-config-item:nth-child(3) { border-color: var(--accent-warm); }
+.loop-config-item:nth-child(4) { border-color: var(--accent-primary); }
+
+.loop-config-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+/* ─── Runners list in setup ─── */
+.runners-list {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.runner-list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background: rgba(255,255,255,0.02);
+  border-radius: var(--radius-sm);
+  margin-bottom: 6px;
+}
+
+.runner-list-item span {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.btn-remove {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: none;
+  background: rgba(233,69,96,0.15);
+  color: var(--accent-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.btn-add-runner {
+  width: 100%;
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  border: 2px dashed var(--border-subtle);
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.btn-add-runner:active {
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+}
+
+/* ─── Duration setup ─── */
+.duration-selector {
+  display: flex;
+  gap: 8px;
+}
+
+.duration-option {
+  flex: 1;
+  padding: 10px 8px;
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--border-subtle);
+  background: var(--bg-deep);
+  color: var(--text-secondary);
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.duration-option.selected {
+  border-color: var(--accent-primary);
+  background: rgba(233,69,96,0.1);
+  color: var(--accent-primary);
+}
+
+/* ─── Summary screen ─── */
+.summary-runner {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 12px;
+  border: 1px solid var(--border-subtle);
+}
+
+.summary-runner-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.summary-runner-name {
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+
+.summary-total {
+  text-align: right;
+}
+
+.summary-total-dist {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--accent-warm);
+}
+
+.summary-total-label {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.summary-passage {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+
+.summary-passage:last-child { border-bottom: none; }
+
+.summary-passage-num {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.summary-passage-info {
+  flex: 1;
+  font-size: 0.8rem;
+}
+
+.summary-passage-info strong {
+  font-weight: 700;
+}
+
+.summary-passage-time {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-align: right;
+}
+
+.summary-passage-speed {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+}
+
+.summary-avg {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.summary-avg-item {
+  text-align: center;
+}
+
+.summary-avg-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--accent-green);
+}
+
+.summary-avg-label {
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 2px;
+}
+
+/* ─── Bottom nav ─── */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: rgba(15,15,26,0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  padding: 8px 16px;
+  padding-bottom: calc(8px + var(--safe-bottom));
+}
+
+.nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 4px;
+  border-radius: 12px;
+  border: none;
+  background: none;
+  color: var(--text-muted);
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.nav-item svg {
+  width: 22px;
+  height: 22px;
+  transition: all 0.2s;
+}
+
+.nav-item.active {
+  color: var(--accent-primary);
+}
+
+.nav-item.active svg {
+  filter: drop-shadow(0 0 6px rgba(233,69,96,0.4));
+}
+
+/* ─── Coaching screen ─── */
+.coaching-runner-select {
+  margin-bottom: 16px;
+}
+
+.runner-select-scroll {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px 0;
+  -webkit-overflow-scrolling: touch;
+}
+
+.runner-select-scroll::-webkit-scrollbar { display: none; }
+
+.runner-chip {
+  padding: 10px 18px;
+  border-radius: 30px;
+  border: 2px solid var(--border-subtle);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.runner-chip:active { transform: scale(0.95); }
+
+.runner-chip.selected {
+  border-color: var(--accent-primary);
+  background: rgba(233,69,96,0.12);
+  color: var(--accent-primary);
+}
+
+/* ─── Modal ─── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0,0,0,0.7);
+  display: none;
+  align-items: flex-end;
+  justify-content: center;
+  animation: fadeOverlay 0.2s ease;
+}
+
+.modal-overlay.open { display: flex; }
+
+@keyframes fadeOverlay {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal-sheet {
+  width: 100%;
+  max-width: 500px;
+  background: var(--bg-card);
+  border-radius: 24px 24px 0 0;
+  padding: 24px 20px;
+  padding-bottom: calc(24px + var(--safe-bottom));
+  animation: slideUp 0.3s ease;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.modal-handle {
+  width: 36px;
+  height: 4px;
+  background: var(--text-muted);
+  border-radius: 2px;
+  margin: 0 auto 20px;
+}
+
+.modal-title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  margin-bottom: 20px;
+}
+
+/* ─── Big action button ─── */
+.btn-primary {
+  width: 100%;
+  padding: 16px;
+  border-radius: var(--radius);
+  border: none;
+  background: linear-gradient(135deg, var(--accent-primary), #c0392b);
+  color: #fff;
+  font-family: 'Outfit', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 20px rgba(233,69,96,0.3);
+}
+
+.btn-primary:active { transform: scale(0.97); }
+
+.btn-secondary {
+  width: 100%;
+  padding: 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 10px;
+}
+
+.btn-secondary:active { transform: scale(0.97); }
+
+/* ─── Empty state ─── */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+}
+
+.empty-state svg {
+  width: 56px;
+  height: 56px;
+  margin-bottom: 16px;
+  opacity: 0.3;
+}
+
+.empty-state p {
+  font-size: 0.9rem;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+/* ─── Countdown display ─── */
+.remaining-time {
+  text-align: center;
+  padding: 8px;
+  margin-bottom: 12px;
+  border-radius: var(--radius-sm);
+  background: rgba(233,69,96,0.08);
+  border: 1px solid rgba(233,69,96,0.15);
+}
+
+.remaining-label {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 600;
+}
+
+.remaining-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--accent-primary);
+}
+
+.remaining-time.warning {
+  background: rgba(245,166,35,0.1);
+  border-color: rgba(245,166,35,0.2);
+}
+
+.remaining-time.warning .remaining-value {
+  color: var(--accent-warm);
+}
+
+.remaining-time.critical {
+  background: rgba(233,69,96,0.15);
+  border-color: rgba(233,69,96,0.3);
+  animation: pulse 1s ease infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* ─── Confirm flash ─── */
+.passage-flash {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 200;
+  background: var(--accent-green);
+  color: #fff;
+  padding: 24px 40px;
+  border-radius: 20px;
+  font-size: 1.2rem;
+  font-weight: 800;
+  text-align: center;
+  animation: flashIn 0.6s ease forwards;
+  pointer-events: none;
+  box-shadow: 0 10px 40px rgba(46,204,113,0.4);
+}
+
+@keyframes flashIn {
+  0% { opacity: 0; transform: translate(-50%,-50%) scale(0.8); }
+  20% { opacity: 1; transform: translate(-50%,-50%) scale(1.05); }
+  80% { opacity: 1; transform: translate(-50%,-50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%,-50%) scale(0.9); }
+}
+
+.passage-flash .flash-speed {
+  font-size: 0.85rem;
+  font-weight: 600;
+  opacity: 0.9;
+  margin-top: 4px;
+}
+
+/* ─── Undo bar ─── */
+.undo-bar {
+  position: fixed;
+  bottom: 90px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 90;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 30px;
+  padding: 10px 20px;
+  display: none;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+  animation: slideUpSmall 0.3s ease;
+}
+
+.undo-bar.show { display: flex; }
+
+@keyframes slideUpSmall {
+  from { transform: translateX(-50%) translateY(20px); opacity: 0; }
+  to { transform: translateX(-50%) translateY(0); opacity: 1; }
+}
+
+.btn-undo {
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: none;
+  background: var(--accent-warm);
+  color: #fff;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* ─── Export ─── */
+.export-area {
+  background: var(--bg-deep);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--text-secondary);
+  max-height: 200px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+  margin-top: 12px;
+}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-logo">
+    <svg viewBox="0 0 28 28" fill="none"><path d="M14 2L3 9v10l11 7 11-7V9L14 2z" stroke="currentColor" stroke-width="2" fill="none"/><path d="M14 8l-6 4v6l6 4 6-4v-6l-6-4z" fill="var(--accent-primary)" opacity="0.3"/><circle cx="14" cy="14" r="3" fill="var(--accent-primary)"/></svg>
+    <h1>Trail Coach</h1>
+  </div>
+  <div class="header-actions">
+    <button class="btn-icon" onclick="showExport()" title="Exporter">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- Main content -->
+<div class="main-content">
+
+  <!-- SETUP SCREEN -->
+  <div class="screen active" id="screen-setup">
+    
+    <div class="setup-card">
+      <h3>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        Durée de course
+      </h3>
+      <div class="duration-selector" id="duration-selector">
+        <button class="duration-option" data-min="10">10 min</button>
+        <button class="duration-option selected" data-min="15">15 min</button>
+        <button class="duration-option" data-min="20">20 min</button>
+        <button class="duration-option" data-min="25">25 min</button>
+        <button class="duration-option" data-min="30">30 min</button>
+      </div>
+      <div class="form-group" style="margin-top:12px;">
+        <label class="form-label">Ou durée personnalisée (minutes)</label>
+        <input type="number" class="form-input" id="custom-duration" placeholder="Ex: 18" min="1" max="120">
+      </div>
+    </div>
+
+    <div class="setup-card">
+      <h3>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12c0 5.52-4.48 10-10 10S2 17.52 2 12 6.48 2 12 2"/><path d="M22 2L12 12"/></svg>
+        Boucles
+      </h3>
+      <div id="loops-config">
+        <div class="loop-config-item">
+          <div class="loop-config-title">Boucle 1</div>
+          <div class="form-row-3">
+            <div class="form-group"><label class="form-label">Nom</label><input type="text" class="form-input loop-name-input" value="Verte" data-loop="1"></div>
+            <div class="form-group"><label class="form-label">Dist. (m)</label><input type="number" class="form-input loop-dist-input" value="400" data-loop="1"></div>
+            <div class="form-group"><label class="form-label">D+ (m)</label><input type="number" class="form-input loop-dplus-input" value="5" data-loop="1"></div>
+          </div>
+        </div>
+        <div class="loop-config-item">
+          <div class="loop-config-title">Boucle 2</div>
+          <div class="form-row-3">
+            <div class="form-group"><label class="form-label">Nom</label><input type="text" class="form-input loop-name-input" value="Bleue" data-loop="2"></div>
+            <div class="form-group"><label class="form-label">Dist. (m)</label><input type="number" class="form-input loop-dist-input" value="600" data-loop="2"></div>
+            <div class="form-group"><label class="form-label">D+ (m)</label><input type="number" class="form-input loop-dplus-input" value="15" data-loop="2"></div>
+          </div>
+        </div>
+        <div class="loop-config-item">
+          <div class="loop-config-title">Boucle 3</div>
+          <div class="form-row-3">
+            <div class="form-group"><label class="form-label">Nom</label><input type="text" class="form-input loop-name-input" value="Orange" data-loop="3"></div>
+            <div class="form-group"><label class="form-label">Dist. (m)</label><input type="number" class="form-input loop-dist-input" value="800" data-loop="3"></div>
+            <div class="form-group"><label class="form-label">D+ (m)</label><input type="number" class="form-input loop-dplus-input" value="30" data-loop="3"></div>
+          </div>
+        </div>
+        <div class="loop-config-item">
+          <div class="loop-config-title">Boucle 4</div>
+          <div class="form-row-3">
+            <div class="form-group"><label class="form-label">Nom</label><input type="text" class="form-input loop-name-input" value="Rouge" data-loop="4"></div>
+            <div class="form-group"><label class="form-label">Dist. (m)</label><input type="number" class="form-input loop-dist-input" value="1200" data-loop="4"></div>
+            <div class="form-group"><label class="form-label">D+ (m)</label><input type="number" class="form-input loop-dplus-input" value="50" data-loop="4"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="setup-card">
+      <h3>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+        Coureurs
+      </h3>
+      <div class="form-row">
+        <div class="form-group">
+          <input type="text" class="form-input" id="new-runner-name" placeholder="Nom du coureur">
+        </div>
+        <button class="btn-add-runner" onclick="addRunner()">+ Ajouter</button>
+      </div>
+      <div class="runners-list" id="runners-list"></div>
+      <div style="margin-top:10px; display:flex; gap:8px;">
+        <button class="btn-add-runner" onclick="quickAddRunners()" style="font-size:0.75rem;">
+          + Ajout rapide (numéros)
+        </button>
+      </div>
+    </div>
+
+    <button class="btn-primary" onclick="startSession()" style="margin-top:8px;">
+      Lancer la session
+    </button>
+  </div>
+
+  <!-- COACHING SCREEN -->
+  <div class="screen" id="screen-coaching">
+    
+    <div class="timer-display">
+      <div class="timer-time" id="main-timer">00:00</div>
+      <div class="timer-label">Temps écoulé</div>
+    </div>
+
+    <div class="timer-controls">
+      <button class="btn-timer btn-start" id="btn-start" onclick="toggleTimer()">
+        <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+        Départ
+      </button>
+      <button class="btn-timer btn-reset" onclick="confirmReset()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15"/></svg>
+      </button>
+    </div>
+
+    <div class="remaining-time" id="remaining-display" style="display:none;">
+      <div class="remaining-label">Temps restant</div>
+      <div class="remaining-value" id="remaining-time">--:--</div>
+    </div>
+
+    <div class="coaching-runner-select">
+      <div class="section-title">Coureur</div>
+      <div class="runner-select-scroll" id="runner-chips"></div>
+    </div>
+
+    <div class="section-title">Passage — choisir la boucle</div>
+    <div class="loop-grid" id="loop-grid"></div>
+
+    <div class="section-title">Derniers passages</div>
+    <div id="passage-feed"></div>
+  </div>
+
+  <!-- RUNNERS LIST SCREEN -->
+  <div class="screen" id="screen-runners">
+    <div class="section-title" style="margin-top:8px;">Coureurs en course</div>
+    <div id="runners-overview"></div>
+  </div>
+
+  <!-- SUMMARY SCREEN -->
+  <div class="screen" id="screen-summary">
+    <div class="section-title" style="margin-top:8px;">Résumé de la session</div>
+    <div id="summary-content"></div>
+    <button class="btn-secondary" onclick="showExport()" style="margin-top:16px;">
+      📋 Exporter les résultats
+    </button>
+  </div>
+
+</div>
+
+<!-- Bottom nav -->
+<div class="bottom-nav">
+  <button class="nav-item active" data-screen="setup" onclick="switchScreen('setup')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+    Config
+  </button>
+  <button class="nav-item" data-screen="coaching" onclick="switchScreen('coaching')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+    Coach
+  </button>
+  <button class="nav-item" data-screen="runners" onclick="switchScreen('runners')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+    Coureurs
+  </button>
+  <button class="nav-item" data-screen="summary" onclick="switchScreen('summary')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+    Résumé
+  </button>
+</div>
+
+<!-- Undo bar -->
+<div class="undo-bar" id="undo-bar">
+  <span id="undo-text">Passage enregistré</span>
+  <button class="btn-undo" onclick="undoLastPassage()">Annuler</button>
+</div>
+
+<!-- Export modal -->
+<div class="modal-overlay" id="export-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Exporter les résultats</div>
+    <button class="btn-primary" onclick="copyExport()">📋 Copier dans le presse-papier</button>
+    <div class="export-area" id="export-text"></div>
+    <button class="btn-secondary" onclick="closeModal('export-modal')">Fermer</button>
+  </div>
+</div>
+
+<!-- Reset confirm modal -->
+<div class="modal-overlay" id="reset-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Réinitialiser ?</div>
+    <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:20px;">
+      Cela supprimera tous les passages et remettra le chrono à zéro. Les coureurs et boucles seront conservés.
+    </p>
+    <button class="btn-primary" onclick="resetSession(); closeModal('reset-modal');">Oui, réinitialiser</button>
+    <button class="btn-secondary" onclick="closeModal('reset-modal')">Annuler</button>
+  </div>
+</div>
+
+<!-- Quick add modal -->
+<div class="modal-overlay" id="quickadd-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Ajout rapide</div>
+    <div class="form-group">
+      <label class="form-label">Préfixe (optionnel)</label>
+      <input type="text" class="form-input" id="quick-prefix" placeholder="Ex: Élève" value="Coureur">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Nombre de coureurs</label>
+      <input type="number" class="form-input" id="quick-count" placeholder="Ex: 25" value="10" min="1" max="50">
+    </div>
+    <button class="btn-primary" onclick="doQuickAdd()">Ajouter</button>
+    <button class="btn-secondary" onclick="closeModal('quickadd-modal')">Annuler</button>
+  </div>
+</div>
+
+<script>
+// ─── STATE ───
+let state = {
+  duration: 15, // minutes
+  loops: [
+    { id: 1, name: 'Verte', distance: 400, dplus: 5 },
+    { id: 2, name: 'Bleue', distance: 600, dplus: 15 },
+    { id: 3, name: 'Orange', distance: 800, dplus: 30 },
+    { id: 4, name: 'Rouge', distance: 1200, dplus: 50 },
+  ],
+  runners: [],
+  passages: [], // { runnerId, loopId, timestamp (ms since start), lapTime (ms) }
+  timerRunning: false,
+  startTime: null,
+  elapsed: 0, // ms
+  selectedRunner: null,
+};
+
+let timerInterval = null;
+let undoTimeout = null;
+let lastPassage = null;
+
+// ─── PERSISTENCE ───
+function saveState() {
+  try {
+    const s = { ...state };
+    localStorage.setItem('trail-coach-state', JSON.stringify(s));
+  } catch(e) {}
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem('trail-coach-state');
+    if (raw) {
+      const s = JSON.parse(raw);
+      Object.assign(state, s);
+      // Restore timer if was running
+      if (state.timerRunning && state.startTime) {
+        state.elapsed = Date.now() - state.startTime;
+        startTimerLoop();
+      }
+    }
+  } catch(e) {}
+}
+
+// ─── NAVIGATION ───
+function switchScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelector(`.nav-item[data-screen="${name}"]`).classList.add('active');
+  
+  if (name === 'coaching') renderCoaching();
+  if (name === 'runners') renderRunnersOverview();
+  if (name === 'summary') renderSummary();
+}
+
+// ─── DURATION ───
+document.getElementById('duration-selector').addEventListener('click', e => {
+  const btn = e.target.closest('.duration-option');
+  if (!btn) return;
+  document.querySelectorAll('.duration-option').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  state.duration = parseInt(btn.dataset.min);
+  document.getElementById('custom-duration').value = '';
+  saveState();
+});
+
+document.getElementById('custom-duration').addEventListener('input', e => {
+  const v = parseInt(e.target.value);
+  if (v > 0) {
+    state.duration = v;
+    document.querySelectorAll('.duration-option').forEach(b => b.classList.remove('selected'));
+    saveState();
+  }
+});
+
+// ─── RUNNERS MANAGEMENT ───
+function addRunner(name) {
+  if (!name) {
+    const input = document.getElementById('new-runner-name');
+    name = input.value.trim();
+    input.value = '';
+    input.focus();
+  }
+  if (!name) return;
+  
+  const id = Date.now() + Math.random();
+  state.runners.push({ id, name });
+  saveState();
+  renderRunnersList();
+}
+
+document.getElementById('new-runner-name').addEventListener('keydown', e => {
+  if (e.key === 'Enter') addRunner();
+});
+
+function removeRunner(id) {
+  state.runners = state.runners.filter(r => r.id !== id);
+  state.passages = state.passages.filter(p => p.runnerId !== id);
+  saveState();
+  renderRunnersList();
+}
+
+function renderRunnersList() {
+  const list = document.getElementById('runners-list');
+  list.innerHTML = state.runners.map(r => `
+    <div class="runner-list-item">
+      <span>${r.name}</span>
+      <button class="btn-remove" onclick="removeRunner(${r.id})">×</button>
+    </div>
+  `).join('');
+}
+
+function quickAddRunners() {
+  document.getElementById('quickadd-modal').classList.add('open');
+}
+
+function doQuickAdd() {
+  const prefix = document.getElementById('quick-prefix').value.trim() || 'Coureur';
+  const count = parseInt(document.getElementById('quick-count').value) || 10;
+  for (let i = 1; i <= count; i++) {
+    const id = Date.now() + Math.random() + i;
+    state.runners.push({ id, name: `${prefix} ${i}` });
+  }
+  saveState();
+  renderRunnersList();
+  closeModal('quickadd-modal');
+}
+
+// ─── SESSION ───
+function startSession() {
+  // Read loop config from inputs
+  document.querySelectorAll('.loop-name-input').forEach(input => {
+    const loopId = parseInt(input.dataset.loop);
+    const loop = state.loops.find(l => l.id === loopId);
+    if (loop) loop.name = input.value.trim() || `Boucle ${loopId}`;
+  });
+  document.querySelectorAll('.loop-dist-input').forEach(input => {
+    const loopId = parseInt(input.dataset.loop);
+    const loop = state.loops.find(l => l.id === loopId);
+    if (loop) loop.distance = parseInt(input.value) || 400;
+  });
+  document.querySelectorAll('.loop-dplus-input').forEach(input => {
+    const loopId = parseInt(input.dataset.loop);
+    const loop = state.loops.find(l => l.id === loopId);
+    if (loop) loop.dplus = parseInt(input.value) || 0;
+  });
+
+  if (state.runners.length === 0) {
+    alert('Ajoutez au moins un coureur !');
+    return;
+  }
+
+  state.selectedRunner = state.runners[0].id;
+  saveState();
+  switchScreen('coaching');
+}
+
+// ─── TIMER ───
+function toggleTimer() {
+  if (state.timerRunning) {
+    pauseTimer();
+  } else {
+    if (!state.startTime) {
+      state.startTime = Date.now();
+    } else {
+      // Resume: adjust startTime
+      state.startTime = Date.now() - state.elapsed;
+    }
+    state.timerRunning = true;
+    saveState();
+    startTimerLoop();
+  }
+  updateTimerButton();
+}
+
+function startTimerLoop() {
+  clearInterval(timerInterval);
+  timerInterval = setInterval(updateTimer, 100);
+  updateTimerButton();
+}
+
+function pauseTimer() {
+  state.timerRunning = false;
+  clearInterval(timerInterval);
+  saveState();
+  updateTimerButton();
+}
+
+function updateTimer() {
+  if (!state.timerRunning || !state.startTime) return;
+  state.elapsed = Date.now() - state.startTime;
+  
+  const display = document.getElementById('main-timer');
+  display.textContent = formatTime(state.elapsed);
+  
+  // Remaining time
+  const totalMs = state.duration * 60 * 1000;
+  const remaining = totalMs - state.elapsed;
+  const remDisplay = document.getElementById('remaining-display');
+  const remValue = document.getElementById('remaining-time');
+  
+  if (state.timerRunning) {
+    remDisplay.style.display = 'block';
+    if (remaining > 0) {
+      remValue.textContent = formatTime(remaining);
+      remDisplay.className = 'remaining-time';
+      if (remaining < 60000) {
+        remDisplay.className = 'remaining-time critical';
+      } else if (remaining < 180000) {
+        remDisplay.className = 'remaining-time warning';
+      }
+    } else {
+      remValue.textContent = '+' + formatTime(Math.abs(remaining));
+      remDisplay.className = 'remaining-time critical';
+    }
+  }
+}
+
+function updateTimerButton() {
+  const btn = document.getElementById('btn-start');
+  if (state.timerRunning) {
+    btn.className = 'btn-timer btn-stop';
+    btn.innerHTML = `<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg> Pause`;
+  } else {
+    btn.className = 'btn-timer btn-start';
+    btn.innerHTML = `<svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg> ${state.startTime ? 'Reprendre' : 'Départ'}`;
+  }
+}
+
+function confirmReset() {
+  document.getElementById('reset-modal').classList.add('open');
+}
+
+function resetSession() {
+  state.passages = [];
+  state.elapsed = 0;
+  state.startTime = null;
+  state.timerRunning = false;
+  clearInterval(timerInterval);
+  document.getElementById('main-timer').textContent = '00:00';
+  document.getElementById('remaining-display').style.display = 'none';
+  saveState();
+  updateTimerButton();
+  renderCoaching();
+}
+
+// ─── COACHING RENDER ───
+function renderCoaching() {
+  // Runner chips
+  const chips = document.getElementById('runner-chips');
+  chips.innerHTML = state.runners.map(r => `
+    <button class="runner-chip ${state.selectedRunner === r.id ? 'selected' : ''}" 
+            onclick="selectRunner(${r.id})">
+      ${r.name}
+    </button>
+  `).join('');
+
+  // Loop buttons
+  const grid = document.getElementById('loop-grid');
+  const isRunning = state.timerRunning;
+  const loopColors = { 1: 'var(--accent-green)', 2: 'var(--accent-blue)', 3: 'var(--accent-warm)', 4: 'var(--accent-primary)' };
+  
+  grid.innerHTML = state.loops.map(l => `
+    <button class="loop-btn ${!isRunning ? 'disabled' : ''}" data-loop="${l.id}" onclick="recordPassage(${l.id})">
+      <div class="loop-name">${l.name}</div>
+      <div class="loop-info">
+        <span>${l.distance}m</span> · <span>D+ ${l.dplus}m</span>
+      </div>
+    </button>
+  `).join('');
+
+  // Passage feed (last 15)
+  renderPassageFeed();
+}
+
+function selectRunner(id) {
+  state.selectedRunner = id;
+  saveState();
+  document.querySelectorAll('.runner-chip').forEach(c => {
+    c.classList.toggle('selected', parseInt(c.getAttribute('onclick').match(/\d+/)[0]) == id);
+  });
+}
+
+// ─── RECORD PASSAGE ───
+function recordPassage(loopId) {
+  if (!state.timerRunning || !state.selectedRunner) return;
+  
+  const runner = state.runners.find(r => r.id === state.selectedRunner);
+  const loop = state.loops.find(l => l.id === loopId);
+  if (!runner || !loop) return;
+
+  const timestamp = state.elapsed;
+  
+  // Calculate lap time (time since last passage for this runner)
+  const runnerPassages = state.passages.filter(p => p.runnerId === runner.id);
+  const lastRunnerPassage = runnerPassages.length > 0 ? runnerPassages[runnerPassages.length - 1] : null;
+  const lapTime = lastRunnerPassage ? timestamp - lastRunnerPassage.timestamp : timestamp;
+
+  const passage = {
+    id: Date.now() + Math.random(),
+    runnerId: runner.id,
+    runnerName: runner.name,
+    loopId: loopId,
+    loopName: loop.name,
+    distance: loop.distance,
+    dplus: loop.dplus,
+    timestamp: timestamp,
+    lapTime: lapTime,
+  };
+
+  state.passages.push(passage);
+  lastPassage = passage;
+  saveState();
+
+  // Flash confirmation
+  const speed = calcSpeed(loop.distance, lapTime);
+  const equivSpeed = calcEquivSpeed(loop.distance, loop.dplus, lapTime);
+  showFlash(runner.name, loop.name, formatTime(lapTime), speed, equivSpeed);
+
+  // Show undo
+  showUndo(`${runner.name} → ${loop.name}`);
+
+  // Auto-advance to next runner
+  autoAdvanceRunner();
+
+  renderPassageFeed();
+}
+
+function autoAdvanceRunner() {
+  const idx = state.runners.findIndex(r => r.id === state.selectedRunner);
+  if (idx < state.runners.length - 1) {
+    state.selectedRunner = state.runners[idx + 1].id;
+  }
+  // Update chips
+  document.querySelectorAll('.runner-chip').forEach(c => {
+    const rId = parseFloat(c.getAttribute('onclick').match(/[\d.]+/)[0]);
+    c.classList.toggle('selected', rId === state.selectedRunner);
+  });
+}
+
+function showFlash(runner, loop, time, speed, equivSpeed) {
+  const existing = document.querySelector('.passage-flash');
+  if (existing) existing.remove();
+
+  const flash = document.createElement('div');
+  flash.className = 'passage-flash';
+  flash.innerHTML = `
+    ${runner} — ${loop}<br>
+    <span style="font-size:1.5rem;">${time}</span>
+    <div class="flash-speed">${speed} km/h${equivSpeed !== speed ? ` (éq. ${equivSpeed} km/h)` : ''}</div>
+  `;
+  document.body.appendChild(flash);
+  setTimeout(() => flash.remove(), 800);
+}
+
+function showUndo(text) {
+  clearTimeout(undoTimeout);
+  const bar = document.getElementById('undo-bar');
+  document.getElementById('undo-text').textContent = text;
+  bar.classList.add('show');
+  undoTimeout = setTimeout(() => bar.classList.remove('show'), 5000);
+}
+
+function undoLastPassage() {
+  if (!lastPassage) return;
+  state.passages = state.passages.filter(p => p.id !== lastPassage.id);
+  lastPassage = null;
+  saveState();
+  renderPassageFeed();
+  document.getElementById('undo-bar').classList.remove('show');
+}
+
+function renderPassageFeed() {
+  const feed = document.getElementById('passage-feed');
+  const recent = [...state.passages].reverse().slice(0, 15);
+  
+  if (recent.length === 0) {
+    feed.innerHTML = `<div class="empty-state">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+      <p>Lancez le chrono puis cliquez<br>sur une boucle pour enregistrer<br>un passage</p>
+    </div>`;
+    return;
+  }
+
+  feed.innerHTML = recent.map(p => {
+    const loop = state.loops.find(l => l.id === p.loopId);
+    const speed = calcSpeed(p.distance, p.lapTime);
+    const equivSpeed = calcEquivSpeed(p.distance, p.dplus, p.lapTime);
+    return `
+      <div class="passage-item">
+        <div class="passage-loop-badge" data-loop="${p.loopId}">${p.loopId}</div>
+        <div class="passage-details">
+          <div class="passage-runner-name">${p.runnerName}</div>
+          <div class="passage-meta">${p.loopName} · ${p.distance}m</div>
+        </div>
+        <div class="passage-time">
+          <div class="passage-time-value">${formatTime(p.lapTime)}</div>
+          <div class="passage-speed">${speed} km/h${p.dplus > 0 ? ` (éq.${equivSpeed})` : ''}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ─── RUNNERS OVERVIEW ───
+function renderRunnersOverview() {
+  const container = document.getElementById('runners-overview');
+  
+  if (state.runners.length === 0) {
+    container.innerHTML = `<div class="empty-state"><p>Aucun coureur configuré</p></div>`;
+    return;
+  }
+
+  container.innerHTML = state.runners.map(runner => {
+    const passages = state.passages.filter(p => p.runnerId === runner.id);
+    const totalDist = passages.reduce((s, p) => s + p.distance, 0);
+    const totalDplus = passages.reduce((s, p) => s + p.dplus, 0);
+    const isRunning = state.timerRunning;
+
+    return `
+      <div class="runner-card" onclick="selectRunnerAndSwitch(${runner.id})">
+        <div class="runner-card-header">
+          <span class="runner-name">${runner.name}</span>
+          <span class="runner-status ${passages.length > 0 ? 'running' : ''}">${passages.length} passage${passages.length > 1 ? 's' : ''}</span>
+        </div>
+        <div class="runner-stats">
+          <div class="runner-stat">
+            <span class="runner-stat-label">Distance</span>
+            <span class="runner-stat-value">${totalDist}m</span>
+          </div>
+          <div class="runner-stat">
+            <span class="runner-stat-label">D+</span>
+            <span class="runner-stat-value">${totalDplus}m</span>
+          </div>
+          <div class="runner-stat">
+            <span class="runner-stat-label">Boucles</span>
+            <span class="runner-stat-value">${passages.length}</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function selectRunnerAndSwitch(id) {
+  state.selectedRunner = id;
+  saveState();
+  switchScreen('coaching');
+}
+
+// ─── SUMMARY ───
+function renderSummary() {
+  const container = document.getElementById('summary-content');
+  
+  if (state.passages.length === 0) {
+    container.innerHTML = `<div class="empty-state"><p>Aucun passage enregistré</p></div>`;
+    return;
+  }
+
+  const loopColors = { 1: 'var(--accent-green)', 2: 'var(--accent-blue)', 3: 'var(--accent-warm)', 4: 'var(--accent-primary)' };
+
+  container.innerHTML = state.runners.map(runner => {
+    const passages = state.passages.filter(p => p.runnerId === runner.id);
+    if (passages.length === 0) return '';
+
+    const totalDist = passages.reduce((s, p) => s + p.distance, 0);
+    const totalDplus = passages.reduce((s, p) => s + p.dplus, 0);
+    const totalTime = passages.length > 0 ? passages[passages.length - 1].timestamp : 0;
+    const avgSpeed = totalTime > 0 ? ((totalDist / 1000) / (totalTime / 3600000)).toFixed(1) : '0';
+    const avgEquivSpeed = totalTime > 0 ? (((totalDist + totalDplus * 10) / 1000) / (totalTime / 3600000)).toFixed(1) : '0';
+
+    const passagesHtml = passages.map((p, i) => {
+      const speed = calcSpeed(p.distance, p.lapTime);
+      const equivSpeed = calcEquivSpeed(p.distance, p.dplus, p.lapTime);
+      return `
+        <div class="summary-passage">
+          <div class="summary-passage-num" style="background:${loopColors[p.loopId] || 'var(--text-muted)'}">
+            ${i + 1}
+          </div>
+          <div class="summary-passage-info">
+            <strong>${p.loopName}</strong> · ${p.distance}m · D+${p.dplus}m
+          </div>
+          <div class="summary-passage-time">
+            ${formatTime(p.lapTime)}
+            <div class="summary-passage-speed">${speed} km/h${p.dplus > 0 ? ` (éq.${equivSpeed})` : ''}</div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    return `
+      <div class="summary-runner">
+        <div class="summary-runner-header">
+          <span class="summary-runner-name">${runner.name}</span>
+          <div class="summary-total">
+            <div class="summary-total-dist">${totalDist}m</div>
+            <div class="summary-total-label">dist. totale · D+${totalDplus}m</div>
+          </div>
+        </div>
+        ${passagesHtml}
+        <div class="summary-avg">
+          <div class="summary-avg-item">
+            <div class="summary-avg-value">${formatTime(totalTime)}</div>
+            <div class="summary-avg-label">Temps total</div>
+          </div>
+          <div class="summary-avg-item">
+            <div class="summary-avg-value">${avgSpeed}</div>
+            <div class="summary-avg-label">Vitesse moy. (km/h)</div>
+          </div>
+          <div class="summary-avg-item">
+            <div class="summary-avg-value">${avgEquivSpeed}</div>
+            <div class="summary-avg-label">Vit. équiv. (km/h)</div>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ─── EXPORT ───
+function showExport() {
+  const text = generateExportText();
+  document.getElementById('export-text').textContent = text;
+  document.getElementById('export-modal').classList.add('open');
+}
+
+function generateExportText() {
+  let txt = `TRAIL COACH — Résultats\n`;
+  txt += `Date: ${new Date().toLocaleDateString('fr-FR')} ${new Date().toLocaleTimeString('fr-FR')}\n`;
+  txt += `Durée prévue: ${state.duration} min\n`;
+  txt += `${'═'.repeat(40)}\n\n`;
+
+  txt += `BOUCLES:\n`;
+  state.loops.forEach(l => {
+    txt += `  ${l.name}: ${l.distance}m, D+${l.dplus}m\n`;
+  });
+  txt += `\n`;
+
+  state.runners.forEach(runner => {
+    const passages = state.passages.filter(p => p.runnerId === runner.id);
+    if (passages.length === 0) return;
+    
+    const totalDist = passages.reduce((s, p) => s + p.distance, 0);
+    const totalDplus = passages.reduce((s, p) => s + p.dplus, 0);
+    const totalTime = passages[passages.length - 1].timestamp;
+    const avgSpeed = ((totalDist / 1000) / (totalTime / 3600000)).toFixed(1);
+
+    txt += `${'─'.repeat(40)}\n`;
+    txt += `${runner.name}\n`;
+    txt += `Distance totale: ${totalDist}m | D+: ${totalDplus}m | Vitesse moy: ${avgSpeed} km/h\n`;
+    
+    passages.forEach((p, i) => {
+      const speed = calcSpeed(p.distance, p.lapTime);
+      const equivSpeed = calcEquivSpeed(p.distance, p.dplus, p.lapTime);
+      txt += `  ${i+1}. ${p.loopName} (${p.distance}m) → ${formatTime(p.lapTime)} | ${speed} km/h`;
+      if (p.dplus > 0) txt += ` (éq. ${equivSpeed} km/h)`;
+      txt += ` | à ${formatTime(p.timestamp)}\n`;
+    });
+    txt += `\n`;
+  });
+
+  return txt;
+}
+
+function copyExport() {
+  const text = generateExportText();
+  navigator.clipboard.writeText(text).then(() => {
+    alert('Copié !');
+  }).catch(() => {
+    // Fallback
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    alert('Copié !');
+  });
+}
+
+// ─── MODALS ───
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+// Close modal on overlay click
+document.querySelectorAll('.modal-overlay').forEach(modal => {
+  modal.addEventListener('click', e => {
+    if (e.target === modal) modal.classList.remove('open');
+  });
+});
+
+// ─── UTILS ───
+function formatTime(ms) {
+  if (!ms || ms < 0) ms = 0;
+  const totalSeconds = Math.floor(ms / 1000);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+}
+
+function calcSpeed(distanceM, timeMs) {
+  if (!timeMs || timeMs <= 0) return '0.0';
+  const hours = timeMs / 3600000;
+  const km = distanceM / 1000;
+  return (km / hours).toFixed(1);
+}
+
+// Vitesse équivalente: on ajoute 10m de distance plate par mètre de D+
+function calcEquivSpeed(distanceM, dplusM, timeMs) {
+  if (!timeMs || timeMs <= 0) return '0.0';
+  const equivDist = distanceM + (dplusM * 10); // 1m D+ ≈ 10m plat
+  const hours = timeMs / 3600000;
+  const km = equivDist / 1000;
+  return (km / hours).toFixed(1);
+}
+
+// ─── INIT ───
+loadState();
+renderRunnersList();
+
+// Restore setup form values from state
+state.loops.forEach(l => {
+  const nameInput = document.querySelector(`.loop-name-input[data-loop="${l.id}"]`);
+  const distInput = document.querySelector(`.loop-dist-input[data-loop="${l.id}"]`);
+  const dplusInput = document.querySelector(`.loop-dplus-input[data-loop="${l.id}"]`);
+  if (nameInput) nameInput.value = l.name;
+  if (distInput) distInput.value = l.distance;
+  if (dplusInput) dplusInput.value = l.dplus;
+});
+
+// Restore duration
+document.querySelectorAll('.duration-option').forEach(b => {
+  b.classList.toggle('selected', parseInt(b.dataset.min) === state.duration);
+});
+
+// If session already started, go to coaching
+if (state.startTime) {
+  switchScreen('coaching');
+}
+
+updateTimerButton();
+
+// Prevent sleep on mobile
+let wakeLock = null;
+async function requestWakeLock() {
+  try {
+    if ('wakeLock' in navigator) {
+      wakeLock = await navigator.wakeLock.request('screen');
+    }
+  } catch(e) {}
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && state.timerRunning) {
+    requestWakeLock();
+    // Recalculate elapsed
+    if (state.startTime) {
+      state.elapsed = Date.now() - state.startTime;
+      updateTimer();
+    }
+  }
+});
+
+// ─── SERVICE WORKER REGISTRATION ───
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').then(reg => {
+    // Check for updates periodically
+    setInterval(() => reg.update(), 60 * 1000);
+  });
+}
+</script>
+</body>
+</html>
